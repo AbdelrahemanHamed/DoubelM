@@ -16,7 +16,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # -----------------------------
 SECRET_KEY = 'django-insecure-^77rj(g@&t9ga)13n$m#g4%634i%g%&f_iyr3(ki$7x1^=r6up'
 DEBUG = True
-ALLOWED_HOSTS = ['192.168.1.10', 'localhost', '127.0.0.1', '10.0.156.119', '10.0.2.2','doublem-7f146490b902.herokuapp.com']
+ALLOWED_HOSTS = ['192.168.1.10', 'localhost', '127.0.0.1', '10.0.156.119', '10.0.2.2']
 
 # -----------------------------
 # APPLICATION DEFINITION
