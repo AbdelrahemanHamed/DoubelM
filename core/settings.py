@@ -5,6 +5,7 @@ Django settings for core project.
 import os
 from pathlib import Path
 from datetime import timedelta
+import dj_database_url
 
 # -----------------------------
 # BASE DIRECTORY
@@ -14,9 +15,20 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # -----------------------------
 # SECRET KEY & DEBUG
 # -----------------------------
-SECRET_KEY = 'django-insecure-^77rj(g@&t9ga)13n$m#g4%634i%g%&f_iyr3(ki$7x1^=r6up'
-DEBUG = True
-ALLOWED_HOSTS = ['192.168.1.10', 'localhost', '127.0.0.1', '10.0.156.119', '10.0.2.2','doublem-7f146490b902.herokuapp.com']
+SECRET_KEY = os.environ.get(
+    'DJANGO_SECRET_KEY',
+    'django-insecure-^77rj(g@&t9ga)13n$m#g4%634i%g%&f_iyr3(ki$7x1^=r6up'
+)
+
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'
+
+# -----------------------------
+# ALLOWED HOSTS
+# -----------------------------
+ALLOWED_HOSTS = os.environ.get(
+    'ALLOWED_HOSTS',
+    'localhost,127.0.0.1,doublem.herokuapp.com'
+).split(',')
 
 # -----------------------------
 # APPLICATION DEFINITION
@@ -62,7 +74,7 @@ ROOT_URLCONF = 'core.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],  # Templates folder
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -77,27 +89,27 @@ TEMPLATES = [
 WSGI_APPLICATION = 'core.wsgi.application'
 
 # -----------------------------
-# DATABASE
+# DATABASE (Heroku Postgres)
 # -----------------------------
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "doublem_db",
-        "USER": "postgres",
-        "PASSWORD": "123456789",
-        "HOST": "localhost",
-        "PORT": "5432",
-    }
+    "default": dj_database_url.config(
+        default=os.environ.get(
+            'DATABASE_URL',
+            'postgres://postgres:123456789@localhost:5432/doublem_db'
+        ),
+        conn_max_age=600,
+        ssl_require=os.environ.get('DATABASE_URL') is not None
+    )
 }
 
 # -----------------------------
 # PASSWORD VALIDATION
 # -----------------------------
 AUTH_PASSWORD_VALIDATORS = [
-    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',},
-    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',},
-    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',},
-    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',},
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
 # -----------------------------
@@ -112,11 +124,11 @@ USE_TZ = True
 # STATIC FILES
 # -----------------------------
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'  # Where collectstatic will put files
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # -----------------------------
-# MEDIA FILES (for course images)
+# MEDIA FILES
 # -----------------------------
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
@@ -150,3 +162,15 @@ SIMPLE_JWT = {
     "BLACKLIST_AFTER_ROTATION": True,
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
+
+# -----------------------------
+# Heroku SSL & Proxy Settings
+# -----------------------------
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# -----------------------------
+# Heroku Specific Settings
+# -----------------------------
+# Activate Django-Heroku (optional if using dj-database-url and whitenoise)
+# import django_heroku
+# django_heroku.settings(locals())
