@@ -25,10 +25,8 @@ DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 # -----------------------------
 # ALLOWED HOSTS
 # -----------------------------
-ALLOWED_HOSTS = os.environ.get(
-    'ALLOWED_HOSTS',
-    'localhost,127.0.0.1,doublem.herokuapp.com'
-).split(',')
+ALLOWED_HOSTS = ['*']
+
 
 # -----------------------------
 # APPLICATION DEFINITION
@@ -53,14 +51,17 @@ INSTALLED_APPS = [
     'courses',
     'codes',
     'quizzes',
+    "corsheaders",
+
 ]
 
 # -----------------------------
 # MIDDLEWARE
 # -----------------------------
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",  # <-- add this at the top
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # For static files on Heroku
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Static files for Heroku
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -70,6 +71,13 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'core.urls'
+
+# Allow all origins (disable CORS restrictions)
+CORS_ALLOW_ALL_ORIGINS = True
+
+# Optional: if you want to allow credentials like cookies
+CORS_ALLOW_CREDENTIALS = True
+
 
 TEMPLATES = [
     {
@@ -89,7 +97,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'core.wsgi.application'
 
 # -----------------------------
-# DATABASE (Heroku Postgres)
+# DATABASE (Heroku PostgreSQL)
 # -----------------------------
 DATABASES = {
     "default": dj_database_url.config(
@@ -169,8 +177,7 @@ SIMPLE_JWT = {
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # -----------------------------
-# Heroku Specific Settings
+# Optional: Django-Heroku (if needed)
 # -----------------------------
-# Activate Django-Heroku (optional if using dj-database-url and whitenoise)
 # import django_heroku
 # django_heroku.settings(locals())
