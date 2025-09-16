@@ -1,19 +1,21 @@
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
+from rest_framework.permissions import IsAdminUser
 from .models import Teacher
 from .serializers import TeacherSerializer
 
-# Public: get all teachers
+# -----------------------------
+# Public: Get all teachers
+# -----------------------------
 @api_view(['GET'])
 def get_all_teachers(request):
     teachers = Teacher.objects.all()
     serializer = TeacherSerializer(teachers, many=True, context={'request': request})
     return Response(serializer.data)
 
-# Admin-only: add teacher
-from rest_framework.permissions import IsAdminUser
-from rest_framework.decorators import permission_classes
-
+# -----------------------------
+# Admin-only: Add teacher
+# -----------------------------
 @api_view(['POST'])
 @permission_classes([IsAdminUser])
 def add_teacher(request):

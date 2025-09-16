@@ -5,7 +5,7 @@ class Course(models.Model):
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, related_name="courses")
     title = models.CharField(max_length=255)
     description = models.TextField()
-    image = models.ImageField(upload_to="course_images/", null=True, blank=True)
+    image = models.ImageField(upload_to="course_images/", null=True, blank=True)  # ✅ course image
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
