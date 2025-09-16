@@ -1,0 +1,36 @@
+# Python
+*.pyc
+*.pyo
+__pycache__/
+*.pyd
+
+# Virtual environment
+venv/
+ENV/
+env/
+.venv/
+
+# Django stuff
+*.sqlite3
+db.sqlite3
+*.log
+*.pot
+*.py[cod]
+*.so
+
+# Media and static files (optional)
+media/
+staticfiles/
+
+# VS Code settings
+.vscode/
+
+# Mac/Linux files
+.DS_Store
+*.swp
+
+# Pytest cache
+.pytest_cache/
+
+# My local environment
+.env
