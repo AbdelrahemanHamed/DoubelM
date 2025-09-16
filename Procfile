@@ -1,1 +1,1 @@
-web: gunicorn DoubelM.wsgi --log-file -
+web: gunicorn DoubleM.wsgi --log-file -
