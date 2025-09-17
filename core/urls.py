@@ -26,6 +26,8 @@ urlpatterns = [
     path('courses/', include('courses.urls')),
     path("api/", include("quizzes.urls")),
     path("api/codes/", include("codes.urls")),  # <-- أضف ده
+    path('api/quizzes/', include('quizzes.urls')),  # ✅ add this
+
 ]
 
 if settings.DEBUG:
