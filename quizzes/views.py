@@ -22,7 +22,7 @@ class QuizListAPIView(generics.ListAPIView):
             used=True,
         )
 
-        # Filter only valid ones
+        # Collect only valid courses
         valid_courses = [c.course for c in valid_codes if c.is_valid()]
         return Quiz.objects.filter(course__in=valid_courses)
 
@@ -30,35 +30,52 @@ class QuizListAPIView(generics.ListAPIView):
 # 🔹 Start quiz attempt
 class StartQuizAPIView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
+    serializer_class = QuizAttemptSerializer  # ✅ important
 
     def post(self, request, *args, **kwargs):
-        quiz = get_object_or_404(Quiz, id=kwargs['quiz_id'])
+        quiz = get_object_or_404(Quiz, id=kwargs.get('quiz_id'))
         user = request.user
 
         # Check course access
-        has_access = CourseCode.objects.filter(
-            course=quiz.course, assigned_to=user, used=True
+        valid_codes = CourseCode.objects.filter(
+            course=quiz.course,
+            assigned_to=user,
+            used=True
         )
-        has_access = [c for c in has_access if c.is_valid()]
-        if not has_access:
-            return Response({"detail": "You are not enrolled in this course."}, status=403)
+        valid_codes = [c for c in valid_codes if c.is_valid()]
+        if not valid_codes:
+            return Response(
+                {"detail": "You are not enrolled in this course."},
+                status=status.HTTP_403_FORBIDDEN
+            )
 
+        # Either get ongoing attempt or create new one
         attempt, created = QuizAttempt.objects.get_or_create(
-            user=user, quiz=quiz, completed=False
+            user=user,
+            quiz=quiz,
+            completed=False
         )
-        return Response(QuizAttemptSerializer(attempt).data, status=200)
+
+        serializer = self.get_serializer(attempt)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 # 🔹 Submit answers
 class SubmitQuizAPIView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
+    serializer_class = SubmitAnswerSerializer
 
     def post(self, request, *args, **kwargs):
-        quiz = get_object_or_404(Quiz, id=kwargs['quiz_id'])
+        quiz = get_object_or_404(Quiz, id=kwargs.get('quiz_id'))
         user = request.user
-        attempt = get_object_or_404(QuizAttempt, user=user, quiz=quiz, completed=False)
+        attempt = get_object_or_404(
+            QuizAttempt,
+            user=user,
+            quiz=quiz,
+            completed=False
+        )
 
-        serializer = SubmitAnswerSerializer(data=request.data, many=True)
+        serializer = self.get_serializer(data=request.data, many=True)
         serializer.is_valid(raise_exception=True)
 
         score = 0
@@ -67,7 +84,13 @@ class SubmitQuizAPIView(generics.CreateAPIView):
         for ans in serializer.validated_data:
             question_id = ans['question_id']
             selected_answer_id = ans['selected_answer_id']
-            answer = get_object_or_404(Answer, id=selected_answer_id, question_id=question_id)
+
+            # Check that selected answer belongs to the right question
+            answer = get_object_or_404(
+                Answer,
+                id=selected_answer_id,
+                question_id=question_id
+            )
 
             UserAnswer.objects.create(
                 attempt=attempt,
@@ -88,7 +111,7 @@ class SubmitQuizAPIView(generics.CreateAPIView):
             "score": score,
             "total": total,
             "result": f"{score}/{total}"
-        })
+        }, status=status.HTTP_200_OK)
 
 
 # 🔹 View my past results
@@ -97,4 +120,7 @@ class MyQuizResultsAPIView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return QuizAttempt.objects.filter(user=self.request.user, completed=True).order_by('-created_at')
+        return QuizAttempt.objects.filter(
+            user=self.request.user,
+            completed=True
+        ).order_by('-created_at')

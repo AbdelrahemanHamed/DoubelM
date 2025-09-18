@@ -25,8 +25,15 @@ class QuizSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'time_limit', 'questions']
 
 
+# 🔹 Lightweight version for listing attempts or starting a quiz
+class QuizBasicSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Quiz
+        fields = ['id', 'title', 'time_limit']
+
+
 class QuizAttemptSerializer(serializers.ModelSerializer):
-    quiz = QuizSerializer()
+    quiz = QuizBasicSerializer(read_only=True)  # ✅ prevents write errors
 
     class Meta:
         model = QuizAttempt

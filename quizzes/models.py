@@ -35,7 +35,7 @@ class Answer(models.Model):
 
 class QuizAttempt(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name="attempts")
     score = models.IntegerField(default=0)
     total = models.IntegerField(default=0)
     completed = models.BooleanField(default=False)
