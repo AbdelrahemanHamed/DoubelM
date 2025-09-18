@@ -1,4 +1,3 @@
-# quizzes/serializers.py
 from rest_framework import serializers
 from .models import Quiz, Question, Answer, QuizAttempt, UserAnswer
 
@@ -25,7 +24,7 @@ class QuizSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'time_limit', 'questions']
 
 
-# 🔹 Lightweight version for listing attempts or starting a quiz
+# Lightweight version for list views
 class QuizBasicSerializer(serializers.ModelSerializer):
     class Meta:
         model = Quiz
@@ -33,7 +32,8 @@ class QuizBasicSerializer(serializers.ModelSerializer):
 
 
 class QuizAttemptSerializer(serializers.ModelSerializer):
-    quiz = QuizBasicSerializer(read_only=True)  # ✅ prevents write errors
+    # ✅ FIXED: include full quiz details instead of basic
+    quiz = QuizSerializer(read_only=True)
 
     class Meta:
         model = QuizAttempt
